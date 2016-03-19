@@ -85,6 +85,10 @@ pEdge = do
 
 pIndices = (pInt `sepBy1` cSep) <* optional newline
 
+pCells = do
+  try $ string "C\n"
+  many pIndices
+
 pVEFC = do
   string "V\n"
   v <- pVertices
@@ -92,7 +96,6 @@ pVEFC = do
   e <- many pEdge
   string "F\n"
   f <- many pIndices
-  string "C\n"
-  c <- many pIndices
+  c <- pCells <|> (return [])
   eof
   return $ VEFC v e f c
