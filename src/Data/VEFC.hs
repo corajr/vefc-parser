@@ -1,5 +1,7 @@
 module Data.VEFC where
 
+import Data.List (intercalate)
+import Data.Char (toUpper)
 import Text.ParserCombinators.Parsec
 
 data VEFC = VEFC
@@ -10,6 +12,52 @@ data VEFC = VEFC
   } deriving (Show, Eq)
 
 type Vertex = (Float, Float, Float, Float)
+
+-- Output
+pprint :: String -> VEFC -> String
+pprint shape@(x:xs) (VEFC v e f _) =
+  let vs = printVertices shape v
+      es = printEdges shape e
+      fs = printFaces shape f
+  in unlines $ [ "module Four.Geometry." ++ ((toUpper x) : xs) ++ " where"
+               , ""
+               , "import Math.Vector4 exposing (..)"
+               , "import Array"
+               , ""
+               ] ++ intercalate [""] [vs, es, fs]
+
+listIndent :: [String] -> [String]
+listIndent = map ("  , " ++)
+
+printVertex :: Vertex -> String
+printVertex (a,b,c,d) =
+  "vec4 " ++ intercalate " " (map show [a,b,c,d])
+
+printVertices :: String -> [Vertex] -> [String]
+printVertices shape vs =
+  let (v':vs') = map printVertex vs
+  in [ shape ++ "Vertices = Array.fromList", "  [ " ++ v' ] ++ listIndent vs' ++ [ "  ]" ]
+
+printEdges :: String -> [(Int,Int)] -> [String]
+printEdges shape es =
+  let (e':es') = map show es
+  in [ shape ++ "Edges =", "  [ " ++ e' ] ++ listIndent es' ++ [ "  ]" ]
+
+printFaces :: String -> [[Int]] -> [String]
+printFaces shape fs =
+  let (f':fs') = concatMap tris fs
+  in [ shape ++ "Faces =", "  [ " ++ f' ] ++ listIndent fs' ++ [ "  ]" ]
+
+tris :: [Int] -> [String]
+tris = map show . triGroups
+
+triGroups :: [Int] -> [(Int, Int, Int)]
+triGroups face@(x:_) = go x face
+  where go a [b,c] = [(b,c,a)]
+        go a (a':rest@(b:c:_)) = [(a',b,c)] ++ go a rest
+        go a _ = []
+
+-- Parser
 
 pFloat :: GenParser Char st Float
 pFloat = read <$> many (choice [ digit, char '.', char '-' ] )

@@ -20,3 +20,8 @@ spec = do
     it "should parse a series of vertices" $ do
       parse pVertices "" "1, 0, 0, 0\n2.5, -1.5, 3, 6\n" `shouldBe` Right [ (1,0,0,0)
                                                                           , (2.5, -1.5, 3, 6)]
+  describe "triGroups" $ do
+    it "should return 2 triplets for [1,2,3]" $
+      triGroups [1,2,3] `shouldBe` [(1,2,3), (2,3,1)]
+    it "should return 3 triplets for [1,2,3,4]" $
+      triGroups [1,2,3,4] `shouldBe` [(1,2,3), (2,3,4), (3,4,1)]

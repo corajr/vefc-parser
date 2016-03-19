@@ -8,6 +8,9 @@ main :: IO ()
 main = do
   args <- getArgs
   case args of
-    [fname] -> do
+    [shape, fname] -> do
       s <- readFile fname
-      print $ parse pVEFC fname s
+      case parse pVEFC fname s of
+        Left err -> print err
+        Right vefc -> putStrLn $ pprint shape vefc
+    _ -> putStrLn "Usage: vefc-parser shapeName shape-file.txt"
