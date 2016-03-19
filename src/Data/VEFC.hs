@@ -52,9 +52,8 @@ tris :: [Int] -> [String]
 tris = map show . triGroups
 
 triGroups :: [Int] -> [(Int, Int, Int)]
-triGroups face@(x:_) = go x face
-  where go a [b,c] = [(b,c,a)]
-        go a (a':rest@(b:c:_)) = [(a',b,c)] ++ go a rest
+triGroups (x:(y:xs@(z:_))) = (x,y,z) : go x xs
+  where go a (b:rest@(c:_)) = (b,c,a) : go a rest
         go a _ = []
 
 -- Parser
